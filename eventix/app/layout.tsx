@@ -30,9 +30,9 @@ export default function RootLayout({
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col bg-(--background) text-(--foreground)">
+      <body className="min-h-full flex flex-col bg-background text-foreground">
         <NeonAuthUIProvider authClient={authClient}>
-          <header className="border-b border-(--border) bg-(--surface)/90 backdrop-blur">
+          <header className="border-b border-border bg-(--surface)/90 backdrop-blur">
             <div className="mx-auto flex h-16 w-full max-w-6xl items-center justify-between px-4">
               <Link href="/" className="text-sm font-semibold tracking-wide">
                 Eventix
@@ -40,7 +40,7 @@ export default function RootLayout({
               <nav className="flex items-center gap-4">
                 <Link
                   href="/dashboard"
-                  className="text-sm text-(--muted-foreground)"
+                  className="text-sm text-muted-foreground"
                 >
                   Dashboard
                 </Link>

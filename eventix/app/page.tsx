@@ -1,5 +1,7 @@
-import Image from "next/image";
+import { DashboardContent } from "@/components/dashboard-content";
+import { getSession } from "@/lib/auth/server";
 
-export default function Home() {
-  return <div>Home Page</div>;
+export default async function Home() {
+  const session = await getSession();
+  return <DashboardContent userId={session.data?.user.id} />;
 }
