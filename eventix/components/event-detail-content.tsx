@@ -6,6 +6,15 @@ import Link from "next/link";
 import { Badge } from "./ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { createInviteLinkAction } from "@/lib/actions/events";
+import { CopyInviteButton } from "./copy-invite-button";
+import { SubmitButton } from "./submit-button";
+import {
+  CalendarDays,
+  CheckCircle2,
+  Link2,
+  MapPin,
+  Users,
+} from "lucide-react";
 import {
   Table,
   TableBody,
@@ -18,9 +27,11 @@ import {
 export async function EventDetailContent({
   userId,
   eventId,
+  inviteReady,
 }: {
   userId: string;
   eventId: string;
+  inviteReady: boolean;
 }) {
   const row = await prisma.event.findFirst({
     where: { id: eventId, ownerUserId: userId },
@@ -81,19 +92,30 @@ export async function EventDetailContent({
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div className="space-y-2">
-          <h1 className="text-2xl font-semibold tracking-light">
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <div className="space-y-3">
+          <Badge variant="secondary" className="w-fit">
+            Event workspace
+          </Badge>
+          <h1 className="text-3xl font-semibold tracking-tight">
             {event.title}
           </h1>
-          <p>
-            {event.eventDate
-              ? new Date(event.eventDate).toLocaleString()
-              : "No Date Selected"}
-            {event.location ? ` - ${event.location}` : ""}
-          </p>
+          <div className="flex flex-wrap gap-3 text-sm text-muted-foreground">
+            <span className="inline-flex items-center gap-2">
+              <CalendarDays className="size-4" />
+              {event.eventDate
+                ? new Date(event.eventDate).toLocaleString()
+                : "No Date Selected"}
+            </span>
+            {event.location ? (
+              <span className="inline-flex items-center gap-2">
+                <MapPin className="size-4" />
+                {event.location}
+              </span>
+            ) : null}
+          </div>
           {event.description && (
-            <p className="max-w-2xl text-sm text-muted-foreground">
+            <p className="max-w-2xl text-base leading-7 text-muted-foreground">
               {event.description}
             </p>
           )}
@@ -103,22 +125,36 @@ export async function EventDetailContent({
         </Button>
       </div>
 
-      <div className="flex flex-wrap gap-2 text-xs">
+      <div className="grid gap-3 sm:grid-cols-3">
         <Badge>Going: {event.goingCount}</Badge>
         <Badge variant="secondary">Maybe: {event.maybeCount}</Badge>
         <Badge variant="outline">Not Going: {event.notGoingCount}</Badge>
       </div>
+
+      {inviteReady ? (
+        <div className="flex items-center gap-3 rounded-lg border border-primary/40 bg-primary/10 p-4 text-sm text-primary">
+          <CheckCircle2 className="size-5" />
+          Invite link is ready to share.
+        </div>
+      ) : null}
+
       <Card>
-        <CardHeader>Invite Link</CardHeader>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Link2 className="size-5" />
+            Invite Link
+          </CardTitle>
+        </CardHeader>
         <CardContent className="space-y-3">
-          <p className="text-sm text-muted-foreground">
+          <p className="text-base text-muted-foreground">
             Share This Link With Guests So That They Can RSVP Without Creating
             An Account
           </p>
 
           {inviteUrl ? (
-            <div className="rounded-md border border-border bg-surface p-3 text-sm">
-              {inviteUrl}
+            <div className="flex flex-col gap-3 rounded-lg border border-border bg-input p-4 sm:flex-row sm:items-center sm:justify-between">
+              <p className="break-all text-sm text-foreground">{inviteUrl}</p>
+              <CopyInviteButton inviteUrl={inviteUrl} />
             </div>
           ) : (
             <p className="text-sm text-muted-foreground">
@@ -127,14 +163,19 @@ export async function EventDetailContent({
           )}
 
           <form action={createInviteActionForEvent}>
-            <Button type="submit">Generate Link</Button>
+            <SubmitButton pendingText="Generating...">
+              {inviteUrl ? "Refresh Link Status" : "Generate Link"}
+            </SubmitButton>
           </form>
         </CardContent>
       </Card>
 
       <Card>
         <CardHeader>
-          <CardTitle>Attendees</CardTitle>
+          <CardTitle className="flex items-center gap-2">
+            <Users className="size-5" />
+            Attendees
+          </CardTitle>
         </CardHeader>
         <CardContent>
           {rsvps.length === 0 ? (

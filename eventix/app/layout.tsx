@@ -4,6 +4,7 @@ import "./globals.css";
 import Link from "next/link";
 import { NeonAuthUIProvider, UserButton } from "@neondatabase/auth/react";
 import { authClient } from "../lib/auth/client";
+import { CalendarDays } from "lucide-react";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -32,15 +33,21 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col bg-background text-foreground">
         <NeonAuthUIProvider authClient={authClient} defaultTheme="dark">
-          <header className="border-b border-border bg-(--surface)/90 backdrop-blur">
-            <div className="mx-auto flex h-16 w-full max-w-6xl items-center justify-between px-4">
-              <Link href="/" className="text-sm font-semibold tracking-wide">
+          <header className="sticky top-0 z-10 border-b border-border bg-background/90 backdrop-blur">
+            <div className="mx-auto flex h-18 w-full max-w-6xl items-center justify-between px-4">
+              <Link
+                href="/"
+                className="inline-flex items-center gap-2 text-base font-semibold tracking-wide"
+              >
+                <span className="flex size-9 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+                  <CalendarDays className="size-5" />
+                </span>
                 Eventix
               </Link>
               <nav className="flex items-center gap-4">
                 <Link
                   href="/dashboard"
-                  className="text-sm text-muted-foreground"
+                  className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
                 >
                   Dashboard
                 </Link>
@@ -48,7 +55,7 @@ export default function RootLayout({
               </nav>
             </div>
           </header>
-          <main className="mx-auto flex w-full max-w-6xl flex-1 flex-col px-4 py-8">
+          <main className="mx-auto flex w-full max-w-6xl flex-1 flex-col px-4 py-8 md:py-10">
             {children}
           </main>
         </NeonAuthUIProvider>

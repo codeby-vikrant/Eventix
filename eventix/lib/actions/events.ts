@@ -102,6 +102,7 @@ export async function createInviteLinkAction(eventId: string) {
         update: {}
     })
     revalidatePath(`/events/${eventId}`)
+    redirect(`/events/${eventId}?invite=ready`)
 }
 
 export async function submitOrUpdateRsvpAction(token: string, formData: FormData) {

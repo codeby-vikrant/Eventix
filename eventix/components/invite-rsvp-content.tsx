@@ -5,8 +5,9 @@ import { Badge } from "./ui/badge";
 import { Field } from "./ui/field";
 import { Label } from "./ui/label";
 import { Input } from "./ui/input";
-import { Button } from "./ui/button";
 import { submitOrUpdateRsvpAction } from "@/lib/actions/events";
+import { SubmitButton } from "./submit-button";
+import { CalendarDays, CheckCircle2, MapPin, Send } from "lucide-react";
 
 export async function InviteRsvpContent({
   token,
@@ -51,24 +52,35 @@ export async function InviteRsvpContent({
           <Badge variant="secondary" className="w-fit">
             RSVP
           </Badge>
-          <CardTitle>{event.title}</CardTitle>
-          <p className="text-sm text-muted-foreground">
-            {event.eventDate
-              ? new Date(event.eventDate).toLocaleString()
-              : "No Date Selected"}
-            {event.location ? ` - ${event.location}` : ""}
-          </p>
+          <CardTitle className="text-3xl">{event.title}</CardTitle>
+          <div className="flex flex-wrap gap-3 text-sm text-muted-foreground">
+            <span className="inline-flex items-center gap-2">
+              <CalendarDays className="size-4" />
+              {event.eventDate
+                ? new Date(event.eventDate).toLocaleString()
+                : "No Date Selected"}
+            </span>
+            {event.location ? (
+              <span className="inline-flex items-center gap-2">
+                <MapPin className="size-4" />
+                {event.location}
+              </span>
+            ) : null}
+          </div>
           {event.description ? (
-            <p className="text-sm text-muted-foreground">{event.description}</p>
+            <p className="text-base leading-7 text-muted-foreground">
+              {event.description}
+            </p>
           ) : null}
         </CardHeader>
         <CardContent>
           {submitted ? (
-            <p className="mb-4 rounded-md border border-accent/50 bg-accent/15">
+            <p className="mb-5 flex items-center gap-3 rounded-lg border border-primary/40 bg-primary/10 p-4 text-sm text-primary">
+              <CheckCircle2 className="size-5" />
               Thanks. Your RSVP Has Been Recorded (Or Updated)
             </p>
           ) : null}
-          <form action={submitRsvpForToken}>
+          <form action={submitRsvpForToken} className="space-y-5">
             <Field>
               <Label htmlFor="name">Name</Label>
               <Input
@@ -97,14 +109,17 @@ export async function InviteRsvpContent({
                 name="status"
                 required
                 defaultValue="going"
-                className="flex h-10 w-full rounded-md border-border bg-surface px-3"
+                className="flex h-11 w-full rounded-lg border border-input bg-input px-3.5 text-base outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/35"
               >
                 <option value="going">Going</option>
                 <option value="maybe">Maybe</option>
                 <option value="not_going">Not Going</option>
               </select>
             </Field>
-            <Button type="submit">Submit RSVP</Button>
+            <SubmitButton pendingText="Submitting...">
+              <Send />
+              Submit RSVP
+            </SubmitButton>
           </form>
         </CardContent>
       </Card>
