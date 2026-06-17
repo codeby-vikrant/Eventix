@@ -7,9 +7,19 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { getSession } from "@/lib/auth/server";
 import Link from "next/link";
+import { redirect } from "next/navigation";
+
+export const dynamic = "force-dynamic";
 
 export default async function Home() {
+  const session = await getSession();
+
+  if (session.data?.user.id) {
+    redirect("/dashboard");
+  }
+
   return (
     <div className="flex flex-1 flex-col gap-8">
       <section className="space-y-4">
