@@ -10,7 +10,10 @@ export default async function AccountPage({
   params: Promise<{ path: string }>;
 }) {
   const { path } = await params;
-  <main className="container p-4 md:p-6">
-    <AccountView path={path} />
-  </main>;
+
+  return (
+    <main className="container p-4 md:p-6">
+      <AccountView path={path} />
+    </main>
+  );
 }

@@ -1,22 +1,50 @@
 "use server"
 
 import { redirect } from "next/navigation"
+import { revalidatePath } from "next/cache"
 import { getSession } from "../auth/server"
 import { prisma } from "../prisma"
 import { RsvpStatus } from "@/app/generated/prisma/enums"
 
+async function requireUserId() {
+    const session = await getSession()
+    const userId = session.data?.user.id
+
+    if (!userId) {
+        redirect("/auth/sign-in")
+    }
+
+    return userId
+}
+
+function parseOptionalEventDate(value: string) {
+    if (!value.length) {
+        return null
+    }
+
+    const date = new Date(value)
+    if (Number.isNaN(date.getTime())) {
+        throw new Error("Please Enter A Valid Event Date")
+    }
+
+    return date
+}
+
 function parseCreateEvent(formData: FormData) {
     const title = String(formData.get("title") ?? "").trim()
     if (title.length < 3 || title.length > 120) {
-        throw new Error("Title Must Be Between 3 and 20 characters")
+        throw new Error("Title Must Be Between 3 and 120 Characters")
     }
+
     const description = String(formData.get("description") ?? "").trim()
     const location = String(formData.get("location") ?? "").trim()
     const eventDate = String(formData.get("eventDate") ?? "").trim()
+
     return {
-        title, description: description.length ? description.slice(0, 2000) : null,
+        title,
+        description: description.length ? description.slice(0, 2000) : null,
         location: location.length ? location.slice(0, 200) : null,
-        eventDate: eventDate.length ? eventDate : null
+        eventDate: parseOptionalEventDate(eventDate)
     }
 }
 
@@ -43,24 +71,23 @@ function parseRsvp(formData: FormData) {
 }
 
 export async function createEventAction(formData: FormData) {
-    const session = await getSession()
-    const userId = session.data?.user.id
+    const userId = await requireUserId()
     const input = parseCreateEvent(formData)
     const created = await prisma.event.create({
         data: {
-            ownerUserId: userId!,
+            ownerUserId: userId,
             title: input.title,
             description: input.description,
             location: input.location,
-            eventDate: input.eventDate ? new Date(input.eventDate) : null
+            eventDate: input.eventDate
         }
     })
+    revalidatePath("/dashboard")
     redirect(`/events/${created.id}`)
 }
 
 export async function createInviteLinkAction(eventId: string) {
-    const session = await getSession()
-    const userId = session.data?.user.id
+    const userId = await requireUserId()
     const owns = await prisma.event.findFirst({
         where: { id: eventId, ownerUserId: userId },
         select: { id: true }
@@ -69,12 +96,12 @@ export async function createInviteLinkAction(eventId: string) {
         throw new Error("Event Not Found")
     }
 
-    const token = crypto.randomUUID().replace(/-/g, "")
     await prisma.eventInvite.upsert({
         where: { eventId },
-        create: { eventId, token },
-        update: { token }
+        create: { eventId, token: crypto.randomUUID().replace(/-/g, "") },
+        update: {}
     })
+    revalidatePath(`/events/${eventId}`)
 }
 
 export async function submitOrUpdateRsvpAction(token: string, formData: FormData) {
@@ -112,9 +139,11 @@ export async function submitOrUpdateRsvpAction(token: string, formData: FormData
         },
         update: {
             name: input.name,
+            email: input.email,
             status: input.status as RsvpStatus,
             respondedAt: new Date()
         }
     })
+    revalidatePath(`/events/${eventId}`)
     redirect(`/invite/${token}?submitted=1`)
 }
