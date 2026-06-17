@@ -105,6 +105,20 @@ export async function createInviteLinkAction(eventId: string) {
     redirect(`/events/${eventId}?invite=ready`)
 }
 
+export async function deleteEventAction(eventId: string) {
+    const userId = await requireUserId()
+    const deleted = await prisma.event.deleteMany({
+        where: { id: eventId, ownerUserId: userId }
+    })
+
+    if (deleted.count === 0) {
+        throw new Error("Event Not Found")
+    }
+
+    revalidatePath("/dashboard")
+    redirect("/dashboard")
+}
+
 export async function submitOrUpdateRsvpAction(token: string, formData: FormData) {
     const input = parseRsvp(formData)
     const invite = await prisma.eventInvite.findFirst({

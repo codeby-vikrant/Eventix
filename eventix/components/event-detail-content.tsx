@@ -5,14 +5,16 @@ import { Button } from "./ui/button";
 import Link from "next/link";
 import { Badge } from "./ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
-import { createInviteLinkAction } from "@/lib/actions/events";
+import { createInviteLinkAction, deleteEventAction } from "@/lib/actions/events";
 import { CopyInviteButton } from "./copy-invite-button";
+import { DeleteEventForm } from "./delete-event-form";
 import { SubmitButton } from "./submit-button";
 import {
   CalendarDays,
   CheckCircle2,
   Link2,
   MapPin,
+  Trash2,
   Users,
 } from "lucide-react";
 import {
@@ -85,6 +87,7 @@ export async function EventDetailContent({
     null,
     event.id,
   );
+  const deleteActionForEvent = deleteEventAction.bind(null, event.id);
 
   const inviteUrl = event.inviteToken
     ? `${process.env.NEXT_PUBLIC_APP_URL ?? ""}/invite/${event.inviteToken}`
@@ -210,6 +213,22 @@ export async function EventDetailContent({
               </TableBody>
             </Table>
           )}
+        </CardContent>
+      </Card>
+
+      <Card className="border-destructive/35">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-destructive">
+            <Trash2 className="size-5" />
+            Delete Event
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <p className="max-w-2xl text-sm text-muted-foreground">
+            Once the event is deleted, its invite link and RSVP responses are
+            removed too.
+          </p>
+          <DeleteEventForm deleteAction={deleteActionForEvent} />
         </CardContent>
       </Card>
     </div>
